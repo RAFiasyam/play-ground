@@ -9,7 +9,7 @@ function Items() {
     }
 
     const addItem = (newItem) => {
-        setItems([...items, newItem]);
+        setItems([...Items, newItem]);
     }
 
     return (
