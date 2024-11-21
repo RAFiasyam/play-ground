@@ -1,7 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 function Items() {
   const [items, setItems] = useState([]);
+  const [seconds, setSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    let interval
+    if(isRunning) {
+      interval = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds + 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [isRunning])
+
+  const startTimer = () => setIsRunning(true);
+  const stopTimer = () => setIsRunning(false);
+  const resetTimer = () => {
+    setIsRunning(false);
+    setSeconds(0);
+  }
 
   const handleAddItem = (event) => {
     event.preventDefault();
@@ -28,14 +48,20 @@ function Items() {
         <button type="submit">Add Item</button>
       </form>
       {items.length > 0 && (
-        <ul>
+        <div>
           {items.map((item, index) => (
-            <li key={index}>
-              {item}
+            <div key={index}>
+              <h1>NomorPs: {item}</h1>
+              <h2>Timer: {seconds} Seconds</h2>
+              <div>
+                <button onClick={startTimer} disabled={isRunning}>Start</button>
+                <button onClick={stopTimer} disabled={!isRunning}>Stop</button>
+                <button onClick={resetTimer}>Reset</button>
+              </div>
               <button onClick={() => removeItem(index)}>Remove</button>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
