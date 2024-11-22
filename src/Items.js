@@ -1,44 +1,68 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-function Items() {
-  const [items, setItems] = useState([]);
+function Item({ name, onRemove }) {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    let interval
-    if(isRunning) {
+    let interval;
+    if (isRunning) {
       interval = setInterval(() => {
-        setSeconds((prevSeconds) => prevSeconds + 1);
+        setSeconds((prev) => prev + 1);
       }, 1000);
     }
-
     return () => clearInterval(interval);
-  }, [isRunning])
+  }, [isRunning]);
+
+  const formatTime = (totalSeconds) => {
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  };
 
   const startTimer = () => setIsRunning(true);
   const stopTimer = () => setIsRunning(false);
   const resetTimer = () => {
     setIsRunning(false);
     setSeconds(0);
-  }
+  };
+
+  return (
+    <div>
+      <h1>{name}</h1>
+      <h2>{formatTime(seconds)}</h2>
+      <div>
+        <button onClick={startTimer} disabled={isRunning}>
+          Start
+        </button>
+        <button onClick={stopTimer} disabled={!isRunning}>
+          Stop
+        </button>
+        <button onClick={resetTimer}>Reset</button>
+      </div>
+      <button onClick={onRemove}>Remove</button>
+    </div>
+  );
+}
+
+function Items() {
+  const [items, setItems] = useState([]);
 
   const handleAddItem = (event) => {
     event.preventDefault();
     const newItem = event.target.newItem.value;
 
     if (newItem.trim()) {
-      setItems([...items, newItem]);
+      setItems((prevItems) => [...prevItems, newItem]);
       event.target.newItem.value = '';
     } else {
       alert('Please enter an item name.');
     }
   };
 
-
   const removeItem = (index) => {
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
+    setItems((prevItems) => prevItems.filter((_, i) => i !== index));
   };
 
   return (
@@ -47,22 +71,13 @@ function Items() {
         <input type="text" name="newItem" placeholder="Enter item name" />
         <button type="submit">Add Item</button>
       </form>
-      {items.length > 0 && (
-        <div>
-          {items.map((item, index) => (
-            <div key={index}>
-              <h1>NomorPs: {item}</h1>
-              <h2>Timer: {seconds} Seconds</h2>
-              <div>
-                <button onClick={startTimer} disabled={isRunning}>Start</button>
-                <button onClick={stopTimer} disabled={!isRunning}>Stop</button>
-                <button onClick={resetTimer}>Reset</button>
-              </div>
-              <button onClick={() => removeItem(index)}>Remove</button>
-            </div>
-          ))}
-        </div>
-      )}
+      {items.map((item, index) => (
+        <Item
+          key={index}
+          name={item}
+          onRemove={() => removeItem(index)}
+        />
+      ))}
     </div>
   );
 }
